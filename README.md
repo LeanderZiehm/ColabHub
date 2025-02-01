@@ -15,6 +15,4 @@ Node.js + Express
 Mongodb or Supabase SQL 
 
 
-
-
 Rounter?
