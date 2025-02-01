@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hackathon Explorer</title>
+      <link rel="stylesheet" href="styles.css">
+        <script src="hackathons.js"></script> 
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .hackathon-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .card {
+            width: 250px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .popup, .group-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            width: 80%;
+            max-width: 500px;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+        .group-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .group-card {
+            width: 120px;
+            border: 1px solid #aaa;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            color: black;
+        }
+        .close-btn {
+            display: block;
+            margin-top: 10px;
+            text-align: center;
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+     <header>
+    <h1>HACK GANG</h1>
+    <p class="tagline">A Gang for Hackathons</p>
+    <button style="position: absolute; top: 0; right: 0; margin:30px">Login</button>
+    <button style="position: absolute; top: 0; left: 0; margin:30px">Menu Button to toggle search options</button>
+  </header>
+
+<main>
+    <div class="search-section">
+        <p class="subtitle">Explore Hackathons</p>
+        <input type="text" id="search" placeholder="Search by name, organization, or tags...">
+    </div>
+    <div class="hackathon-grid" id="hackathonGrid">
+    </div>
+</main>
+<footer>
+    <p>© 2025 HackGang</p>
+    <a href="#">Terms and Conditions</a> | 
+    <a href="#">Privacy Policy</a>
+</footer>
+<div class="overlay" id="overlay"></div>
+<div class="popup" id="hackathonPopup">
+    <h2 id="popupTitle"></h2>
+    <p id="popupDetails"></p>
+    <h3>Groups</h3>
+    <div class="group-container" id="groupContainer">
+    </div>
+    <button id="createGroupBtn">Create Group</button>
+    <button class="close-btn" onclick="closePopup()">Close</button>
+</div>
+<div class="group-popup" id="groupPopup">
+    <h2>Create a Group</h2>
+    <input type="text" id="groupName" placeholder="Project Title">
+    <input type="number" id="maxMembers" placeholder="Max Members">
+    <button id="submitGroup">Create</button>
+    <button class="close-btn" onclick="closeGroupPopup()">Cancel</button>
+</div>
+<script>
+const hackathonGrid = document.getElementById("hackathonGrid");
+const searchInput = document.getElementById("search");
+const overlay = document.getElementById("overlay");
+const hackathonPopup = document.getElementById("hackathonPopup");
+const popupTitle = document.getElementById("popupTitle");
+const popupDetails = document.getElementById("popupDetails");
+const groupContainer = document.getElementById("groupContainer");
+const createGroupBtn = document.getElementById("createGroupBtn");
+const groupPopup = document.getElementById("groupPopup");
+const submitGroup = document.getElementById("submitGroup");
+const hackathonGroups = [
+    {
+        name: "AI Hack 2025",
+        groups: [
+            { title: "AI Innovators", members: 3, maxMembers: 5, isOpen: true },
+            { title: "Neural Wizards", members: 4, maxMembers: 4, isOpen: false }
+        ]
+    }
+];
+function displayHackathons(filter = "") {
+    hackathonGrid.innerHTML = ""; 
+    const filteredHackathons = hackathons.filter(hackathon => 
+        hackathon.name.toLowerCase().includes(filter) ||
+        hackathon.organization.toLowerCase().includes(filter) ||
+        hackathon.tags.some(tag => tag.toLowerCase().includes(filter))
+    );
+    if (filteredHackathons.length === 0) {
+        hackathonGrid.innerHTML = "<p>No hackathons found</p>";
+        return;
+    }
+    filteredHackathons.forEach((hackathon, index) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.innerHTML = `
+            <img src="${hackathon.image}" alt="${hackathon.name}">
+            <h3>${hackathon.name}</h3>
+            <p><strong>Prize:</strong> ${hackathon.prize}</p>
+            <p><strong>Participants:</strong> ${hackathon.participants}</p>
+        `;
+        card.addEventListener("click", () => openPopup(hackathon.name));
+        hackathonGrid.appendChild(card);
+    });
+}
+
+
+
+
+function openPopup(hackathonName) {
+    const hackathon = getHackathonFromName(hackathonName);
+    popupTitle.textContent = hackathon.name;
+
+
+
+    popupDetails.innerHTML = `
+        <p><strong>Organization:</strong> ${hackathon.organization}</p>
+        <p><strong>Dates:</strong> ${hackathon.dates}</p>
+        <p><strong>Tags:</strong> ${hackathon.tags.join(", ")}</p>
+    `;
+    groupContainer.innerHTML = "";
+
+
+    hackathonGroups.forEach(hackathonGroup => {
+
+        if(hackathonGroup.name == hackathon.name) {
+            console.log(hackathonGroup.name,hackathon.name);
+            console.log(hackathonGroup)
+            const groups = hackathonGroup.groups;
+
+
+
+            groups.forEach(group => {
+                 console.log(group);
+                const groupCard = document.createElement("div");
+        groupCard.classList.add("group-card");
+        groupCard.innerHTML = `
+            <p><strong>${group.title}</strong></p>
+            <p>${group.members}/${group.maxMembers} members</p>
+            <button>${group.isOpen ? "Join" : "Request to Join"}</button>
+        `;
+        groupContainer.appendChild(groupCard);
+    });
+
+           
+        }
+    
+    });
+    createGroupBtn.onclick = () => openCreateGroupPopup(hackathon.name);
+    overlay.style.display = "block";
+    hackathonPopup.style.display = "block";
+}
+function closePopup() {
+    overlay.style.display = "none";
+    hackathonPopup.style.display = "none";
+}
+function openCreateGroupPopup(hackathonName) {
+    groupPopup.style.display = "block";
+    submitGroup.onclick = () => createGroup(hackathonName);
+}
+function closeGroupPopup() {
+    groupPopup.style.display = "none";
+}
+
+
+function getHackathonFromName(hackathonName) {
+    return hackathons.find(hackathon => hackathon.name === hackathonName);
+}
+
+function createGroup(hackathonName) {
+    const groupName = document.getElementById("groupName").value;
+    const maxMembers = document.getElementById("maxMembers").value;
+
+
+    let hackathonGroup = hackathonGroups.find(hackathon => hackathon.name === hackathonName)
+
+    if(!hackathonGroup){
+         const hackathonGroupObject = {name: hackathonName,groups:[]}
+         hackathonGroups.push(hackathonGroupObject)
+    }
+    
+    hackathonGroup = hackathonGroups.find(hackathon => hackathon.name === hackathonName)
+
+
+    hackathonGroup.groups.push({
+        title: groupName,
+        members: 1,
+        maxMembers: parseInt(maxMembers),
+        isOpen: true
+    });
+
+
+
+    closeGroupPopup();
+    openPopup(hackathonName);
+}
+searchInput.addEventListener("input", e => displayHackathons(e.target.value.toLowerCase()));
+displayHackathons();
+</script>
+</body>
+</html>
