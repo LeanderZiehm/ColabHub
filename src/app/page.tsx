@@ -1,11 +1,18 @@
 // 'use client'
 
-import GroupPage from "../components/GroupPage";
+// import GroupPage from "../components/GroupPage";
+import ActiveForums from "@/components/ActiveForums";
+import CreateGroupButton from "@/components/CreateGroupButton";
 
 function IndexPage() {
   
   return (
-    <GroupPage />
+    // <GroupPage />
+    <div>
+  <ActiveForums />
+  <CreateGroupButton />
+    </div>
+  
   );
 };
 
